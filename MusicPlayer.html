@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MusicPlayer</title>
+    <style>
+        @font-face {
+            font-family: 'Material Icons';
+            font-style: normal;
+            font-weight: 400;
+            src: url(https://fonts.gstatic.com/s/materialicons/v50/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2) format('woff2');
+        }
+
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+        html, body {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            height: 100%;
+            background-color: #f5e0e5;
+            background-image: linear-gradient(45deg, #ff9b9c 0%, #ffd4a7 100%);
+            position: relative;
+            font-family: "Roboto", sans-serif;
+        }
+        .musicPlayer {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 330px;
+            height: 530px;
+            border-radius: 15px;
+            background-color: #fff6e7;
+            box-shadow: 0 15px 20px 0 #c58371;
+        }
+
+        .musicPlayer .cover {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            position: absolute;
+            left: 50%;
+            top: 50px;
+            transform: translateX(-50%);
+            box-shadow: 0 5px 20px 0 #d56c006d;
+        }
+        .musicPlayer .info {
+            position: absolute;
+            left: 50%;
+            top: 240px;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+        .musicPlayer .cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .musicPlayer .info .title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #444;
+            margin-bottom: 2px;
+        }
+        .musicPlayer .info .singer {
+            font-size: 12px;
+            color: #72646f;
+        }
+        .musicPlayer .btn-box {
+            position: absolute;
+            top: 65%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        .musicPlayer .btn-box i {
+            font-size: 24px;
+            color: #72646f;
+            margin: 0 18px;
+            cursor: pointer;
+        }
+        .musicPlayer .btn-box i.active {
+            color: #ff3677;
+        }
+        .musicPlayer .music-box {
+            position: absolute;
+            left: 50%;
+            top: 78%;
+            transform: translateX(-50%);
+        }
+        .musicPlayer .music-box .show-currentTime {
+            position: absolute;
+            left: -60px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 13px;
+            color: #72646f;
+        }
+        .musicPlayer .music-box .show-duration {
+            position: absolute;
+            right: -60px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 13px;
+            color: #72646f;
+        }
+        .musicPlayer .music-box .bar-outer {
+            position: relative;
+            width: 150px;
+            height: 5px;
+            background: #f2eae4;
+        }
+
+        .musicPlayer .music-box .bar-inner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 5px;
+            background: #f7d9b9;
+        }
+        .musicPlayer .music-box .bar-dot {
+            position: absolute;
+            top: -3px;
+            right: -4px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ff3677;
+            cursor: pointer;
+        }
+        .musicPlayer .music-panel {
+            position: absolute;
+            left: 50%;
+            top: 85%;
+            width: 222px;
+            height: 70px;
+            transform: translateX(-50%);
+        }
+        .musicPlayer .music-panel #id-button-backward:hover,
+        .musicPlayer .music-panel #id-button-forward:hover {
+            background-color: rgba(238, 238, 238, 0.98);
+            transition: background-color 0.3s ease;
+            -webkit-transition: background-color 0.3s ease;
+        }
+        .musicPlayer .music-panel #id-button-backward {
+            background-image: url(data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTguMS4xLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDI1MC40ODggMjUwLjQ4OCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgMjUwLjQ4OCAyNTAuNDg4OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgd2lkdGg9IjEyOHB4IiBoZWlnaHQ9IjEyOHB4Ij4KPGcgaWQ9IlByZXZpb3VzX3RyYWNrIj4KCTxwYXRoIHN0eWxlPSJmaWxsLXJ1bGU6ZXZlbm9kZDtjbGlwLXJ1bGU6ZXZlbm9kZDsiIGQ9Ik0yMzcuNDg0LDIyLjU4N2MtMy4yNjYsMC03LjU5MS0wLjQwMS0xMS4wNzIsMi4wMDVsLTkyLjI2NCw3Ny45MVYzNy4yNTIgICBjMC0yLjUwNywwLjA1Ny0xNC42NjYtMTMuMDA0LTE0LjY2NmMtMy4yNjUsMC03LjU5LTAuNDAxLTExLjA3MiwyLjAwNUw4LjEwNywxMTAuNjkzYy05LjY2OSw2LjY3NC03Ljk5NywxNC41NTEtNy45OTcsMTQuNTUxICAgcy0xLjY3MSw3Ljg3OCw3Ljk5NywxNC41NTFsMTAxLjk2NSw4Ni4xMDJjMy40ODIsMi40MDUsNy44MDcsMi4wMDQsMTEuMDcyLDIuMDA0YzEzLjA2MiwwLDEzLjAwNC0xMS43LDEzLjAwNC0xNC42NjZ2LTY1LjI0OSAgIGw5Mi4yNjQsNzcuOTExYzMuNDgyLDIuNDA1LDcuODA3LDIuMDA0LDExLjA3MiwyLjAwNGMxMy4wNjIsMCwxMy4wMDQtMTEuNywxMy4wMDQtMTQuNjY2VjM3LjI1MiAgIEMyNTAuNDg4LDM0Ljc0NiwyNTAuNTQ2LDIyLjU4NywyMzcuNDg0LDIyLjU4N3oiIGZpbGw9IiNjMmM2Y2YiLz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8L3N2Zz4K);
+            position: absolute;
+            top: -26%;
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: 22px;
+            margin: 5px 0;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            -webkit-transition: background-color 0.3s ease;
+        }
+        .musicPlayer .music-panel #id-button-forward {
+            background-image: url(data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTguMS4xLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDI1MC40ODggMjUwLjQ4OCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgMjUwLjQ4OCAyNTAuNDg4OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgd2lkdGg9IjEyOHB4IiBoZWlnaHQ9IjEyOHB4Ij4KPGcgaWQ9Ik5leHRfdHJhY2tfMiI+Cgk8cGF0aCBzdHlsZT0iZmlsbC1ydWxlOmV2ZW5vZGQ7Y2xpcC1ydWxlOmV2ZW5vZGQ7IiBkPSJNMjQyLjM4MSwxMTAuNjkzTDE0MC40MTUsMjQuNTkxYy0zLjQ4LTIuNDA2LTcuODA1LTIuMDA1LTExLjA3MS0yLjAwNSAgIGMtMTMuMDYxLDAtMTMuMDAzLDExLjctMTMuMDAzLDE0LjY2NnY2NS4yNDlsLTkyLjI2NS03Ny45MWMtMy40ODItMi40MDYtNy44MDctMi4wMDUtMTEuMDcyLTIuMDA1ICAgQy0wLjA1NywyMi41ODcsMCwzNC4yODcsMCwzNy4yNTJ2MTc1Ljk4M2MwLDIuNTA3LTAuMDU3LDE0LjY2NiwxMy4wMDQsMTQuNjY2YzMuMjY1LDAsNy41OSwwLjQwMSwxMS4wNzItMi4wMDVsOTIuMjY1LTc3LjkxICAgdjY1LjI0OWMwLDIuNTA3LTAuMDU4LDE0LjY2NiwxMy4wMDMsMTQuNjY2YzMuMjY2LDAsNy41OTEsMC40MDEsMTEuMDcxLTIuMDA1bDEwMS45NjYtODYuMTAxICAgYzkuNjY4LTYuNjc1LDcuOTk3LTE0LjU1MSw3Ljk5Ny0xNC41NTFTMjUyLjA0OSwxMTcuMzY3LDI0Mi4zODEsMTEwLjY5M3oiIGZpbGw9IiNjMmM2Y2YiLz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8L3N2Zz4K);
+            position: absolute;
+            top: -26%;
+            right: 0px;
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-size: 22px;
+            margin: 5px 0;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            -webkit-transition: background-color 0.3s ease;
+        }
+        .musicPlayer .music-panel .play,
+        .musicPlayer .music-panel .pause {
+            position: absolute;
+            left: 50%;
+            top: 11px;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.4s;
+        }
+        .musicPlayer .music-panel .play i,
+        .musicPlayer .music-panel .pause i {
+            font-size: 36px;
+            color: #72646f;
+            position: absolute;
+            left: 50%;
+            transform: translate(-48%, -50%);
+        }
+    </style>
+</head>
+<body>
+    <div class="musicPlayer" data-musics="3" data-playing="0">
+        <div class="cover">
+            <img id="id-cover-image" src="1.jpg" alt="">
+        </div>
+        <div class="info">
+            <div class="title"></div>
+            <div class="singer"></div>
+        </div>
+        <div class="btn-box">
+            <i class="material-icons button-box repeat">repeat</i>
+            <i class="material-icons button-box favorite">favorite</i>
+            <span class="button-volume volume-down"><i class="material-icons">remove</i></span>
+            <span class="button-volume volume-up"><i class="material-icons">add</i></span>
+        </div>
+        <div class="music-box">
+            <div class="bar-outer">
+                <div class="bar-inner">
+                    <div class="bar-dot"></div>
+                </div>
+            </div>
+<!--            <input type="range" step="1" class="seekbar" value="0" min="0" max="100" oninput="handleSeekBar()">-->
+            <audio id="id-audio-player" src="1.mp3"></audio>
+            <span class="show-duration"></span><span class="show-currentTime"></span>
+        </div>
+        <div class="music-panel">
+            <span class="play">
+                <i class="material-icons">play_arrow</i>
+            </span>
+            <div id="id-button-backward"></div>
+            <div id="id-button-forward"></div>
+        </div>
+    </div>
+    <script>
+        // 库函数
+        const log = console.log.bind(console)
+
+        const e = function(selector) {
+            let element = document.querySelector(selector)
+            if (element === null) {
+                let s = `选择器 ${selector} 写错了, 请仔细检查并且复习三种基本的选择器`
+                alert(s)
+                return null
+            } else {
+                return element
+            }
+        }
+
+        const es = function(selector) {
+            let elements = document.querySelectorAll(selector)
+            if (elements.length === 0) {
+                let s = `选择器 ${selector} 写错了, 请仔细检查并且复习三种基本的选择器`
+                alert(s)
+                return []
+            } else {
+                return elements
+            }
+        }
+
+        const bindEvent = function(element, eventName, callback) {
+            element.addEventListener(eventName, callback)
+        }
+
+        const bindAll = function(selector, eventName, callback) {
+            let elements = es(selector)
+            for (let i = 0; i < elements.length; i++) {
+                let e = elements[i]
+                bindEvent(e, eventName, callback)
+            }
+        }
+
+        // 切换一个元素的 class
+        const toggleClass = function(element, className) {
+            if (element.classList.contains(className)) {
+                element.classList.remove(className)
+            } else {
+                element.classList.add(className)
+            }
+        }
+
+        // 定义一个对象，存储所有的 歌名和歌手
+        const ObjectOfInfo = {
+            'Never Knows Tomorrow': '朴树',
+            '羽毛': '王心凌',
+            '为爱痴狂': '刘若英',
+        }
+
+        // 同步显示歌曲信息 info
+        const getInfo = function() {
+            let title = e('.title')
+            let singer = e('.singer')
+            let key = Object.keys(ObjectOfInfo)
+            let i = currentIndex()
+            let t = key[i]
+            // log('曲名：', t)
+            title.innerHTML = t
+            let s = ObjectOfInfo[t]
+            singer.innerHTML = s
+        }
+
+        // 定义一个数组，存储所有的音乐路径
+        const arrayOfMusic = function() {
+            let musicPlayer = e('.musicPlayer')
+            let numberOfMusics = Number(musicPlayer.dataset.musics)
+            let n = numberOfMusics
+            let a = []
+            for (let i = 1; i <= n; i++) {
+                let path = `${i}.mp3`
+                a.push(path)
+            }
+            // log('arrayOfMusic: ', a)
+            return a
+        }
+
+        // 定义一个数组，存储所有的图片路径
+        const arrayOfCover = function() {
+            let musicPlayer = e('.musicPlayer')
+            let numberOfMusics = Number(musicPlayer.dataset.musics)
+            let n = numberOfMusics
+            let a = []
+            for (let i = 1; i <= n; i++) {
+                let path = `${i}.jpg`
+                a.push(path)
+            }
+            // log('arrayOfCover: ', a)
+            return a
+        }
+
+        // 获得当前音乐下标
+        const currentIndex = function() {
+            let audio = e('#id-audio-player')
+            let musicPlayer = e('.musicPlayer')
+            let s = audio.src
+            // log('audio.src', s)
+            // 通过切片 src 获得下标
+            for (let i = 0; i < s.length; i++) {
+                if (s[i] === "/") {
+                    s = s.slice(i)
+                }
+            }
+            for (let i = 0; i < s.length; i++) {
+                if (s[i] === "/") {
+                    s = s.slice(i)
+                }
+            }
+            // log('s is:', s, typeof s)
+            let x = Number(s[1])
+            // musicPlayer.dataset.playing = String(x - 1)
+            // let index = Number(musicPlayer.dataset.playing)
+            let index = x - 1
+            return index
+        }
+
+        // 当前播放下一首的下标
+        const nextIndex = function(audio, offset) {
+            let musicPlayer = e('.musicPlayer')
+            let i = currentIndex()
+            let numberOfMusics = Number(musicPlayer.dataset.musics)
+            let nextIndex = (i + offset + numberOfMusics) % numberOfMusics
+            // log('nextIndex', nextIndex)
+            return nextIndex
+        }
+
+        // 通过访问数组元素播放音乐, 并切换封面图
+        const playMusicAtIndex = function(audio, index) {
+            let musicPlayer = e('.musicPlayer')
+            let i = index
+            // 更新index
+            musicPlayer.dataset.playing = String(i)
+            log('currentIndex：', index)
+            // 播放音乐
+            let a = arrayOfMusic()
+            audio.src = a[i]
+            audio.play()
+            //切换封面图
+            let b = arrayOfCover()
+            let cover = e('#id-cover-image')
+            cover.src = b[i]
+            // 切换歌曲信息
+            getInfo()
+        }
+
+        // 播放 暂停
+        const bindEventPlay = function(audio) {
+            let button = e('.play')
+            button.addEventListener('click', function() {
+                if (audio.paused) {
+                    log('播放')
+                    audio.play()
+                    getInfo()
+                    button.className = 'pause'
+                    button.innerHTML = '<i class="material-icons">pause</i>'
+                } else {
+                    log('暂停')
+                    audio.pause()
+                    button.className = 'play'
+                    button.innerHTML = '<i class="material-icons">play_arrow</i>'
+                }
+            })
+        }
+
+        // 切换 上一首 下一首
+        const bindEventLast = function(audio) {
+            let last = e('#id-button-backward')
+            let button = e('.play')
+            last.addEventListener('click', function() {
+                log('上一首')
+                let i = nextIndex(audio, -1)
+                playMusicAtIndex(audio, i)
+                button.className = 'pause'
+                button.innerHTML = '<i class="material-icons">pause</i>'
+            })
+        }
+
+        const bindEventNext = function(audio) {
+            let last = e('#id-button-forward')
+            let button = e('.play')
+            last.addEventListener('click', function() {
+                log('下一首')
+                let i = nextIndex(audio, 1)
+                playMusicAtIndex(audio, i)
+                button.className = 'pause'
+                button.innerHTML = '<i class="material-icons">pause</i>'
+            })
+        }
+
+        // 将秒换成分
+        const secToMin = function(s) {
+            let x = s / 60
+            let y = s % 60
+            let l = String(Math.floor(x))
+            let r = String(Math.floor(y))
+            let result =''
+            if (l.length === 1) {
+                l = '0' + l
+            }
+            if (r.length === 1) {
+                r = '0' + r
+            }
+            result = l + ':' + r
+            return result
+        }
+
+        // 加入当前时间和总时间显示
+        const getDuration = function(audio) {
+            // 只有在 canplay 事件中才能确保拿到总时长
+            audio.addEventListener('canplay', function() {
+                let d = audio.duration
+                // log('duration in s', d, typeof d)
+                // 将秒换成分
+                let show = secToMin(d)
+                // log('duration in m', show, typeof show)
+                let a = e('.show-duration')
+                a.innerHTML = `${show}`
+            })
+        }
+
+        const getCurrentTime = function(audio) {
+            audio.addEventListener('canplay', function() {
+                setInterval(function() {
+                    let currentTime = audio.currentTime
+                    // log('currentTime is', currentTime, typeof currentTime)
+                    let a = e('.show-currentTime')
+                    let show = secToMin(currentTime)
+                    a.innerHTML = `${show}`
+                }, 1000)
+            })
+        }
+
+        // 进度条
+        // 关联进度条长度
+        const setBarWidth = function(audio) {
+            let inner = e('.bar-inner')
+            audio.addEventListener('canplay', function() {
+                setInterval(function() {
+                    let c = audio.currentTime
+                    let d = audio.duration
+                    let width = c / d * 100
+                    inner.style.width = String(width) + '%'
+                }, 1000)
+            })
+        }
+
+        const bindEventBar = function (audio) {
+            let inner = e('.bar-inner')
+            let outer = e('.bar-outer')
+            let dot = e('.bar-dot')
+            // let result = e('#id-em-move')
+
+            let max = outer.offsetWidth
+            let moving = false
+            let offset = 0
+
+            dot.addEventListener('mousedown', (event) => {
+                log('event', event.clientX, dot.offsetLeft, event.clientX - dot.offsetLeft)
+                offset = event.clientX - dot.offsetLeft
+                moving = true
+            })
+
+            document.addEventListener('mouseup', (event) => {
+                moving = false
+
+            })
+
+            document.addEventListener('mousemove', (event) => {
+                if (moving) {
+                    let x = event.clientX - offset
+                    if (x > max) {
+                        x = max
+                    }
+                    if (x < 0) {
+                        x = 0
+                    }
+                    let width = (x / max) * 100
+                    inner.style.width = String(width) + '%'
+                    audio.currentTime = x / max * audio.duration
+                    // result.innerHTML = x
+                    // log('移动距离', x)
+                }
+            })
+        }
+
+        // 音量
+        const bindEventVolume = function(audio) {
+            e('.volume-down').addEventListener('click', function() {
+                audio.volume -= 0.1
+            })
+            e('.volume-up').addEventListener('click', function() {
+                audio.volume += 0.1
+            })
+        }
+
+        // 循环播放列表
+        const bindEventCircle = function(audio) {
+                audio.addEventListener('ended', function() {
+                    let index = nextIndex(audio, 1)
+                    playMusicAtIndex(audio, index)
+                })
+        }
+
+        // 单曲循环
+        const bindEventSingle = function(audio) {
+            let repeat = e('.repeat')
+            repeat.addEventListener('click', function () {
+                if (repeat.classList.contains('active')) {
+                    log('单曲循环')
+                    audio.addEventListener('ended', function() {
+                        audio.currentTime = 0
+                        audio.play()
+                    })
+                } else {
+                    log('取消单曲循环')
+                    bindEventCircle(audio)
+                }
+            })
+        }
+
+        // 点亮按钮
+        const bindEventActive = function() {
+            let selector = '.button-box'
+            bindAll(selector, 'click', function(event) {
+                let self = event.target
+                toggleClass(self, 'active')
+            })
+            let selector2 = '.button-volume'
+            bindAll(selector2, 'mouseover', function(event) {
+                let self = event.target
+                self.classList.add('active')
+            })
+            bindAll(selector2, 'mouseout', function(event) {
+                let self = event.target
+                self.classList.remove('active')
+            })
+        }
+
+        // 函数入口
+        const bindEvents = function(audio) {
+            bindEventPlay(audio)
+            bindEventLast(audio)
+            bindEventNext(audio)
+            bindEventVolume(audio)
+            bindEventActive(audio)
+            // bindEventCircle(audio)
+            bindEventSingle(audio)
+            bindEventBar(audio)
+        }
+
+        const __main = function() {
+            let audio = e('#id-audio-player')
+            bindEvents(audio)
+            getInfo(audio)
+            setBarWidth(audio)
+            getDuration(audio)
+            getCurrentTime(audio)
+        }
+
+        __main()
+    </script>
+</body>
+</html>
